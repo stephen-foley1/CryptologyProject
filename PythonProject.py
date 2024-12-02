@@ -24,7 +24,7 @@ ecc_security_bits = [80, 112, 128, 192, 256]
 
 # Random message for signing and encryption
 message = secrets.token_bytes(10 * 1024)  # 10KB
-
+#
 
 # Utility Functions
 def print_message(msg):
