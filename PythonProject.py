@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 import matplotlib.pyplot as plt
 
 # Global Variables
-iterations = 10 # Number of iterations for all operations
+iterations = 10  # Number of iterations for all operations
 
 # Key sizes and parameters
 rsa_key_sizes = [1024, 2048, 3072, 7680, 15360]
@@ -25,27 +25,27 @@ ecc_security_bits = [80, 112, 128, 192, 256]
 # Random message for signing and encryption
 message = os.urandom(10 * 1024)  # 10KB
 
-
 # Utility Functions
 def print_message(msg):
+    """Prints a formatted message with a separator."""
     print(f"\n{msg}\n" + "-" * 50)
-
 
 # Keypair generation functions
 def generate_rsa_keypair(key_size):
+    """Generates an RSA keypair of the given key size."""
     return rsa.generate_private_key(public_exponent=65537, key_size=key_size)
 
-
 def generate_dsa_keypair(key_size):
+    """Generates a DSA keypair of the given key size."""
     return dsa.generate_private_key(key_size=key_size)
 
-
 def generate_ecc_keypair(curve):
+    """Generates an ECC keypair using the given curve."""
     return ec.generate_private_key(curve)
-
 
 # Measurement functions
 def measure_keygen_time(algorithm_name, generate_function, params, iterations):
+    """Measures the time taken to generate keypairs for the given algorithm."""
     results = []
     print_message(f"Starting {algorithm_name} keypair generation...")
     for param, security in params:
@@ -60,8 +60,8 @@ def measure_keygen_time(algorithm_name, generate_function, params, iterations):
         print(f"{algorithm_name} Key Size: {security} bits, Average Time: {avg_time:.4f} seconds")
     return results
 
-
 def measure_rsa_encryption_decryption_time():
+    """Measures the time taken for RSA encryption and decryption."""
     print_message("Starting RSA encryption/decryption...")
     enc_results, dec_results = [], []
     for key_size in rsa_key_sizes:
@@ -71,7 +71,7 @@ def measure_rsa_encryption_decryption_time():
         # Determine chunk size
         chunk_size = (key_size // 8) - 2 * hashes.SHA256().digest_size - 2
 
-        enc_times, dec_times = [], []
+        enc_times, dec_times = []
         for _ in range(iterations):
             # Encryption
             start = time.perf_counter()
@@ -94,8 +94,8 @@ def measure_rsa_encryption_decryption_time():
         print(f"RSA Key Size: {key_size} bits, Decryption Average Time: {dec_avg_time:.4f} seconds")
     return enc_results, dec_results
 
-
 def measure_sign_verify_rsa_time(key_size, iterations):
+    """Measures the time taken for RSA signing and verification."""
     sign_results = []
     verify_results = []
     private_key = generate_rsa_keypair(key_size)
@@ -134,8 +134,8 @@ def measure_sign_verify_rsa_time(key_size, iterations):
     print(f"RSA Key Size: {key_size} bits, Verification Average Time: {avg_verify_time:.4f} seconds")
     return avg_sign_time, avg_verify_time
 
-
 def measure_sign_verify_dsa_time(key_size, iterations):
+    """Measures the time taken for DSA signing and verification."""
     sign_results = []
     verify_results = []
     private_key = generate_dsa_keypair(key_size)
@@ -160,6 +160,7 @@ def measure_sign_verify_dsa_time(key_size, iterations):
     return avg_sign_time, avg_verify_time
 
 def measure_sign_verify_ecc_time(curve, iterations):
+    """Measures the time taken for ECC signing and verification."""
     sign_results = []
     verify_results = []
     private_key = generate_ecc_keypair(curve)
@@ -183,9 +184,9 @@ def measure_sign_verify_ecc_time(curve, iterations):
     print(f"ECC Curve: {curve.name}, Verification Average Time: {avg_verify_time:.4f} seconds")
     return avg_sign_time, avg_verify_time
 
-
 # RSA encryption/decryption
 def rsa_encrypt(public_key, plaintext, chunk_size):
+    """Encrypts the plaintext using the RSA public key in chunks."""
     return [
         public_key.encrypt(
             plaintext[i:i + chunk_size],
@@ -198,8 +199,8 @@ def rsa_encrypt(public_key, plaintext, chunk_size):
         for i in range(0, len(plaintext), chunk_size)
     ]
 
-
 def rsa_decrypt(private_key, encrypted_chunks):
+    """Decrypts the encrypted chunks using the RSA private key."""
     return b"".join([
         private_key.decrypt(
             chunk,
@@ -212,9 +213,9 @@ def rsa_decrypt(private_key, encrypted_chunks):
         for chunk in encrypted_chunks
     ])
 
-
 # Plotting Functions
 def plot_results(results, title, xlabel, ylabel, filename):
+    """Plots the results and saves the plot to a file."""
     plt.figure(figsize=(10, 6))
     for label, data in results.items():
         security_levels = [res[0] for res in data]
@@ -229,6 +230,7 @@ def plot_results(results, title, xlabel, ylabel, filename):
     plt.show()
 
 def plot_sign_verify_times(rsa_results, dsa_results, ecc_results, title, xlabel, ylabel, filename):
+    """Plots the signing and verification times for RSA, DSA, and ECC."""
     plt.figure(figsize=(10, 6))
 
     # Extracting results for RSA, DSA, and ECC
@@ -257,9 +259,9 @@ def plot_sign_verify_times(rsa_results, dsa_results, ecc_results, title, xlabel,
     plt.savefig(filename)
     plt.show()
 
-
 # Main Execution
 if __name__ == "__main__":
+    # Measure key generation times
     rsa_keygen_results = measure_keygen_time(
         "RSA", generate_rsa_keypair, zip(rsa_key_sizes, rsa_security_bits), iterations
     )
@@ -270,7 +272,10 @@ if __name__ == "__main__":
         "ECC", generate_ecc_keypair, zip(ecc_curves, ecc_security_bits), iterations
     )
 
+    # Measure RSA encryption and decryption times
     rsa_enc_results, rsa_dec_results = measure_rsa_encryption_decryption_time()
+
+    # Measure signing and verification times for RSA, DSA, and ECC
     rsa_sign_verify_results = [measure_sign_verify_rsa_time(key_size, iterations) for key_size in rsa_key_sizes]
     dsa_sign_verify_results = [measure_sign_verify_dsa_time(key_size, iterations) for key_size in dsa_key_sizes]
     ecc_sign_verify_results = [measure_sign_verify_ecc_time(curve, iterations) for curve in ecc_curves]
