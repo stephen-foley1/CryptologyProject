@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 import matplotlib.pyplot as plt
 
 # Global Variables
-iterations = 100  # Number of iterations for all operations
+iterations = 10  # Number of iterations for all operations
 
 # Key sizes and parameters
 rsa_key_sizes = [1024, 2048, 3072, 7680, 15360]
