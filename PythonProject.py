@@ -3,11 +3,10 @@ import os
 from cryptography.hazmat.primitives.asymmetric import rsa, dsa, ec
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 import matplotlib.pyplot as plt
 
 # Global Variables
-iterations = 100  # Number of iterations for all operations
+iterations = 10 # Number of iterations for all operations
 
 # Key sizes and parameters
 rsa_key_sizes = [1024, 2048, 3072, 7680, 15360]
@@ -58,6 +57,7 @@ def measure_keygen_time(algorithm_name, generate_function, params, iterations):
             times.append(end - start)
         avg_time = sum(times[1:]) / (iterations - 1)  # Ignore the first iteration
         results.append((security, avg_time))
+        print(f"{algorithm_name} Key Size: {security} bits, Average Time: {avg_time:.4f} seconds")
     return results
 
 
@@ -86,8 +86,12 @@ def measure_rsa_encryption_decryption_time():
             # Validate decryption
             assert message == decrypted_message, "Decryption failed!"
 
-        enc_results.append((key_size, sum(enc_times[1:]) / (iterations - 1)))
-        dec_results.append((key_size, sum(dec_times[1:]) / (iterations - 1)))
+        enc_avg_time = sum(enc_times[1:]) / (iterations - 1)
+        dec_avg_time = sum(dec_times[1:]) / (iterations - 1)
+        enc_results.append((key_size, enc_avg_time))
+        dec_results.append((key_size, dec_avg_time))
+        print(f"RSA Key Size: {key_size} bits, Encryption Average Time: {enc_avg_time:.4f} seconds")
+        print(f"RSA Key Size: {key_size} bits, Decryption Average Time: {dec_avg_time:.4f} seconds")
     return enc_results, dec_results
 
 
@@ -126,6 +130,8 @@ def measure_sign_verify_rsa_time(key_size, iterations):
 
     avg_sign_time = sum(sign_results) / iterations
     avg_verify_time = sum(verify_results) / iterations
+    print(f"RSA Key Size: {key_size} bits, Signing Average Time: {avg_sign_time:.4f} seconds")
+    print(f"RSA Key Size: {key_size} bits, Verification Average Time: {avg_verify_time:.4f} seconds")
     return avg_sign_time, avg_verify_time
 
 
@@ -149,6 +155,8 @@ def measure_sign_verify_dsa_time(key_size, iterations):
 
     avg_sign_time = sum(sign_results) / iterations
     avg_verify_time = sum(verify_results) / iterations
+    print(f"DSA Key Size: {key_size} bits, Signing Average Time: {avg_sign_time:.4f} seconds")
+    print(f"DSA Key Size: {key_size} bits, Verification Average Time: {avg_verify_time:.4f} seconds")
     return avg_sign_time, avg_verify_time
 
 def measure_sign_verify_ecc_time(curve, iterations):
@@ -171,6 +179,8 @@ def measure_sign_verify_ecc_time(curve, iterations):
 
     avg_sign_time = sum(sign_results) / iterations
     avg_verify_time = sum(verify_results) / iterations
+    print(f"ECC Curve: {curve.name}, Signing Average Time: {avg_sign_time:.4f} seconds")
+    print(f"ECC Curve: {curve.name}, Verification Average Time: {avg_verify_time:.4f} seconds")
     return avg_sign_time, avg_verify_time
 
 
